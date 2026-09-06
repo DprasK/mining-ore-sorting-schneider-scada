@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="SCADA lokal mining ore sorting untuk Schneider M221 melalui Modbus TCP">
+  <title>Mining Ore Sorting SCADA</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="identity"><span class="plant-mark">OS</span><div><b>MINING ORE SORTING PLANT</b><small>ORE CONVEYOR · XRF ANALYSER · THREE-WAY DIVERSION</small></div></div>
+    <div class="top-status"><span id="profileBadge" class="badge">M221 MODBUS TCP</span><span id="modeBadge" class="badge">MODE —</span><span id="connectionBadge" class="badge offline"><i></i> PLC OFFLINE</span><time id="clock">--:--:--</time></div>
+  </header>
+  <main>
+    <section class="kpi-grid">
+      <article><span>PLANT STATE</span><strong id="plantState">NO DATA</strong><small id="stateDetail">Menunggu Schneider emulator</small></article>
+      <article><span>SAFETY SUMMARY</span><strong id="safetyValue">—</strong><small>%M11 SAFETY_OK</small></article>
+      <article><span>SORTING PHASE</span><strong id="sequenceValue">—</strong><small>TRANSPORT → DIVERT → RESET</small></article>
+      <article><span>ORE DIVERTER</span><strong id="diverterValue">—</strong><small id="diverterDetail">XRF SORTING</small></article>
+      <article><span>MODBUS LATENCY</span><strong><b id="latency">—</b> <em>ms</em></strong><small>127.0.0.1:502 · UNIT 1</small></article>
+    </section>
+
+    <section class="workspace">
+      <div class="process-panel panel">
+        <div class="panel-head"><div><span>PROCESS OVERVIEW</span><b>ORE FLOW · XRF THREE-WAY CLASSIFICATION</b></div><small id="lastUpdate">NO UPDATE</small></div>
+        <div class="process-flow">
+          <article class="equipment" data-unit="conveyor"><div class="unit-head"><span>CV-101</span><i class="status-dot"></i></div><div class="machine-symbol conveyor-symbol"><span></span><span></span></div><b>ORE ANALYSER CONVEYOR</b><small>CONTROLLED ORE TRANSPORT</small><div class="signal-row"><span data-signal="cmd">RUN</span><span data-signal="fb">OUTPUT</span><span data-signal="ready">READY</span></div></article>
+          <div class="flow-arrow"><i></i></div>
+          <article class="equipment" data-unit="xrf101"><div class="unit-head"><span>XRF-101</span><i class="status-dot"></i></div><div class="machine-symbol conveyor-symbol"><span></span><span></span></div><b>GRADE ANALYSER</b><small>HIGH / MEDIUM / REJECT</small><div class="signal-row"><span data-signal="cmd">BUSY</span><span data-signal="fb">ACTIVE</span><span data-signal="ready">READY</span></div></article>
+          <div class="flow-arrow"><i></i></div>
+          <article class="equipment crusher" data-unit="gradeRoute"><div class="unit-head"><span>DV-101A/B</span><i class="status-dot"></i></div><div class="machine-symbol crusher-symbol"><span></span></div><b>PRODUCT DIVERTERS</b><small>HIGH / MEDIUM GRADE</small><div class="signal-row"><span data-signal="cmd">SELECT</span><span data-signal="fb">ACTIVE</span><span data-signal="ready">READY</span></div></article>
+          <div class="flow-arrow"><i></i></div>
+          <article class="equipment" data-unit="rejectRoute"><div class="unit-head"><span>DV-101R</span><i class="status-dot"></i></div><div class="machine-symbol conveyor-symbol long"><span></span><span></span></div><b>REJECT DIVERTER</b><small>LOW-GRADE ORE DISCHARGE</small><div class="signal-row"><span data-signal="cmd">SELECT</span><span data-signal="fb">ACTIVE</span><span data-signal="ready">READY</span></div></article>
+        </div>
+        <div class="aux-strip">
+          <div><span class="aux-dot" id="lubeDot"></span><b>SORT SEQUENCE</b><small id="lubeText">NO DATA</small></div>
+          <div><span class="aux-dot" id="sprayDot"></span><b>DIVERTER PHASE</b><small id="sprayText">NO DATA</small></div>
+          <div><span class="aux-dot" id="safetyDot"></span><b>SAFETY / OVERLOAD</b><small id="safetyText">NO DATA</small></div>
+          <div><span class="aux-dot" id="permitDot"></span><b>COMMON ALARM</b><small id="permitText">NO DATA</small></div>
+        </div>
+      </div>
+
+      <aside class="control-panel panel">
+        <div class="panel-head"><div><span>OPERATOR CONTROL</span><b>WHITELISTED %M COILS</b></div><button id="sessionButton" class="text-button">CONTROL SESSION</button></div>
+        <div id="controlLock" class="control-lock">MONITOR ONLY</div>
+        <div class="mode-controls"><button class="selector" data-toggle="autoMode"><span>AUTO MODE</span><i></i></button><button class="selector" data-toggle="autoEnable"><span>AUTO ENABLE</span><i></i></button></div>
+        <div class="command-grid">
+          <button class="command start" data-pulse="start"><i></i><span>START</span><small>PLANT</small></button>
+          <button class="command stop" data-hold="stop"><i></i><span>STOP</span><small>HOLD</small></button>
+          <button class="command ack" data-pulse="resetCounters"><i></i><span>RESET</span><small>COUNTERS</small></button>
+        </div>
+        <p class="control-note">Kontrol ini menulis hanya `%M0…%M3` dan `%M40`. E-stop tetap harus melalui safety relay atau safety PLC.</p>
+      </aside>
+    </section>
+
+    <section class="lower-grid">
+      <div class="trend-panel panel"><div class="panel-head"><div><span>SEQUENCE TREND</span><b>LAST 120 POLLS</b></div><div class="legend"><i class="tph"></i> ACTIVE UNITS <i class="vib"></i> ALARMS</div></div><canvas id="trend" width="900" height="250"></canvas></div>
+      <div class="alarm-panel panel"><div class="panel-head"><div><span>EVENT SUMMARY</span><b>ACTIVE PLC LATCHES</b></div><small id="alarmStamp">—</small></div><div id="alarms" class="alarms"><p>Menunggu data Schneider emulator.</p></div></div>
+      <div class="permit-panel panel"><div class="panel-head"><div><span>PLC DIAGNOSTICS</span><b>INTERNAL %M STATUS</b></div><small>LIVE MODBUS</small></div><div id="permissives" class="permit-list"></div></div>
+    </section>
+    <section class="tag-panel panel"><div class="panel-head"><div><span>MODBUS MAP</span><b>M221 INTERNAL MEMORY</b></div><button id="toggleTags" class="text-button">SHOW TAGS</button></div><div id="tagTable" class="tag-table" hidden></div></section>
+  </main>
+
+  <dialog id="authDialog"><form method="dialog"><span class="dialog-kicker">CONTROL AUTHORIZATION</span><h2>Open operator session</h2><p>Masukkan token yang tampil di terminal <code>Jalankan_SCADA_CONTROL_SCHNEIDER.cmd</code>. Token hanya disimpan di memori tab.</p><label for="tokenInput">Session token</label><input id="tokenInput" type="password" autocomplete="off" minlength="20"><div><button value="cancel">CANCEL</button><button id="saveToken" value="save" class="primary">OPEN SESSION</button></div></form></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js" defer></script>
+</body>
+</html>
