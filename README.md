@@ -36,4 +36,8 @@ File utama berisi 28 rung. Urutan input tiga blok counter pada rung UI 16–18 d
 4. Pastikan dashboard menunjukkan `SCHNEIDER ONLINE`.
 5. Gunakan launcher control hanya setelah mapping dan interlock diperiksa.
 
+Launcher mencari Machine Expert Basic dari variabel lingkungan `MEB_EXE`, folder
+instalasi standar Windows, lalu `PATH`. Jika aplikasi dipasang di lokasi khusus,
+tetapkan `MEB_EXE` ke lokasi executable sebelum menjalankan launcher.
+
 Tidak ada simulator proses buatan di dalam SCADA. Saat Schneider emulator tidak terhubung, dashboard akan tetap OFFLINE tanpa data fallback.
